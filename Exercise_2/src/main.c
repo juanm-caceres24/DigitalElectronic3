@@ -51,21 +51,21 @@
 /* Systick time */
 #define SYSTICK_TIME 100 // Interrupt time for systick in [ms]
 
-uint8_t systick_counter = 0;         // Counter for systick
-uint8_t battery_level = MAX_BATTERY; // It can be 2(max), 1(mid), 0(low)
+uint8_t systick_counter = 0;         /* Counter for systick */
+uint8_t battery_level = MAX_BATTERY; /* It can be 2(max), 1(mid), 0(low) */
 uint8_t is_closed = 1;
 
 /**
  * @brief Initialize the GPIO peripheral
  *
  */
-void configure_GPIO_port(void)
+void configure_GPIO_ports(void)
 {
     PINSEL_CFG_Type pin_cfg; /* Create a variable to store the configuration of the pins */
 
     /* We need to configure the struct with the desired configuration */
 
-    // START CONFIGURATION FOR DOOR_BUTTON_PIN
+    /* configuration for DOOR_BUTTON_PIN */
     pin_cfg.Portnum = PINSEL_PORT_0;           /* The port number is 0 */
     pin_cfg.Pinnum = PINSEL_PIN_3;             /* The pin number is 3 */
     pin_cfg.Funcnum = PINSEL_FUNC_0;           /* The function number is 0 */
@@ -73,20 +73,20 @@ void configure_GPIO_port(void)
     pin_cfg.OpenDrain = PINSEL_PINMODE_NORMAL; /* The pin is in the normal mode */
     PINSEL_ConfigPin(&pin_cfg);                /* Configure the pin */
 
-    // START CONFIG FOR ENDSTOP_1_PIN
+    /* configuration for ENDSTOP_1_PIN */
     pin_cfg.Pinnum = PINSEL_PIN_4;
     PINSEL_ConfigPin(&pin_cfg);
 
-    // START CONFIG FOR ENDSTOP_2_PIN
+    /* configuration for ENDSTOP_2_PIN */
     pin_cfg.Pinnum = PINSEL_PIN_5;
     PINSEL_ConfigPin(&pin_cfg);
 
-    // START CONFIG FOR LED_PIN
+    /* configuration for BATTERY_LED_PIN */
     pin_cfg.Pinnum = PINSEL_PIN_6;
     pin_cfg.Pinmode = PINSEL_PINMODE_PULLUP;
     PINSEL_ConfigPin(&pin_cfg);
 
-    // START CONFIG FOR RELAY_2
+    /* configuration for RELAY_2 */
     pin_cfg.Portnum = PINSEL_PORT_1;
     pin_cfg.Pinnum = PINSEL_PIN_0;
     pin_cfg.Funcnum = PINSEL_FUNC_0;
@@ -94,11 +94,11 @@ void configure_GPIO_port(void)
     pin_cfg.OpenDrain = PINSEL_PINMODE_NORMAL;
     PINSEL_ConfigPin(&pin_cfg);
 
-    // START CONFIG FOR RELAY_1
+    /* configuration for RELAY_1 */
     pin_cfg.Pinnum = PINSEL_PIN_1;
     PINSEL_ConfigPin(&pin_cfg);
 
-    // START CONFIG FOR LOW_BATTERY_PIN
+    /* configuration for LOW_BATTERY_PIN */
     pin_cfg.Portnum = PINSEL_PORT_0;
     pin_cfg.Pinnum = PINSEL_PIN_28;
     pin_cfg.Funcnum = PINSEL_FUNC_0;
@@ -106,22 +106,22 @@ void configure_GPIO_port(void)
     pin_cfg.OpenDrain = PINSEL_PINMODE_NORMAL;
     PINSEL_ConfigPin(&pin_cfg);
 
-    // START CONFIG FOR MID_BATTERY_PIN
+    /* configuration for MID_BATTERY_PIN */
     pin_cfg.Pinnum = PINSEL_PIN_29;
     PINSEL_ConfigPin(&pin_cfg);
 
-    // START CONFIG FOR MAX_BATTERY_PIN
+    /* configuration for MAX_BATTERY_PIN */
     pin_cfg.Pinnum = PINSEL_PIN_30;
     PINSEL_ConfigPin(&pin_cfg);
 
     /* Set the pins as input or output */
-    GPIO_SetDir(PINSEL_PORT_0, DOOR_BUTTON_PIN | ENDSTOP_1_PIN | ENDSTOP_2_PIN | LOW_BATTERY_BUTTON_PIN | MID_BATTERY_BUTTON_PIN | MAX_BATTERY_BUTTON_PIN, INPUT); /* P0.3 connected to DOOR BUTTON */
-
+    GPIO_SetDir(PINSEL_PORT_0, DOOR_BUTTON_PIN | ENDSTOP_1_PIN | ENDSTOP_2_PIN | LOW_BATTERY_BUTTON_PIN | MID_BATTERY_BUTTON_PIN | MAX_BATTERY_BUTTON_PIN, INPUT);
     GPIO_SetDir(PINSEL_PORT_0, BATTERY_LED_PIN, OUTPUT);
+
     /* P0.6 connected to LED */
     GPIO_SetDir(PINSEL_PORT_1, RELAY_2_PIN | RELAY_1_PIN, OUTPUT); /* P1.0 connected to RELAY2 */
 
-    /*Interrupt habilitations*/
+    /* Interrupt habilitations */
     GPIO_IntCmd(PINSEL_PORT_0, DOOR_BUTTON_PIN | ENDSTOP_1_PIN | ENDSTOP_2_PIN | LOW_BATTERY_BUTTON_PIN | MID_BATTERY_BUTTON_PIN | MAX_BATTERY_BUTTON_PIN, RISING_EDGE);
 }
 
@@ -131,9 +131,8 @@ void configure_GPIO_port(void)
  */
 void close_door(void)
 {
-    GPIO_ClearValue(PINSEL_PORT_0, RELAY_1_PIN); // le damos corriente al relay1 (si le damos corriente lo mandamos a fase)
-    GPIO_SetValue(PINSEL_PORT_0, RELAY_2_PIN);   // no le damos corriente por lo que va a neutro
-    // NOTA los relay estan con un transistor pnp por lo que ponerlo a 0 darles corriente
+    GPIO_ClearValue(PINSEL_PORT_0, RELAY_1_PIN);
+    GPIO_SetValue(PINSEL_PORT_0, RELAY_2_PIN);
 }
 
 /**
@@ -141,10 +140,9 @@ void close_door(void)
  *
  */
 void open_door(void)
-{                                                // Corriente fluye del relay2 al relay1
-    GPIO_SetValue(PINSEL_PORT_0, RELAY_1_PIN);   // no le damos corriente por lo que va a neutro
-    GPIO_ClearValue(PINSEL_PORT_0, RELAY_2_PIN); // le damos corriente al relay2 (si le damos corriente lo mandamos a fase)
-    // NOTA los relay estan con un transistor pnp por lo que ponerlo a 0 darles corriente
+{
+    GPIO_SetValue(PINSEL_PORT_0, RELAY_1_PIN);
+    GPIO_ClearValue(PINSEL_PORT_0, RELAY_2_PIN);
 }
 
 /**
@@ -211,7 +209,7 @@ void EINT3_IRQHandler(void)
  * @brief Configurate systick with internal clock to interrupt every SYSTICK_TIME
  *
  */
-void configure_Systick(void)
+void configure_SysTick(void)
 {
     SYSTICK_InternalInit(SYSTICK_TIME);
 }
@@ -266,8 +264,8 @@ void SysTick_Handler(void)
 int main(void)
 {
     SystemInit();           /* Initialize the system clock (default: 100 MHz) */
-    configure_GPIO_port();  /* Configure GPIO pins */
-    configure_Systick();    /* Configure SysTick */
+    configure_GPIO_ports(); /* Configure GPIO pins */
+    configure_SysTick();    /* Configure SysTick */
     SYSTICK_IntCmd(ENABLE); /* Enable SysTick interrupts */
     SYSTICK_Cmd(ENABLE);    /* Enable SysTick counter */
     while (TRUE)
