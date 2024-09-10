@@ -20,11 +20,10 @@
 /* Pin Definitions */
 
 /* Port 0 */
-#define DOOR_BUTTON_PIN ((uint32_t)(1 << 3)) /* P0.3 connected to DOOR_BUTTON */
-#define ENDSTOP_1_PIN ((uint32_t)(1 << 4))   /* P0.4 connected to ENSDTOP_1 */
-#define ENDSTOP_2_PIN ((uint32_t)(1 << 5))   /* P0.5 connected to ENSDTOP_2 */
-#define BATTERY_LED_PIN ((uint32_t)(1 << 6)) /* P0.6 connected to BATTERY_LED */
-
+#define DOOR_BUTTON_PIN ((uint32_t)(1 << 3))         /* P0.3 connected to DOOR_BUTTON */
+#define ENDSTOP_1_PIN ((uint32_t)(1 << 4))           /* P0.4 connected to ENSDTOP_1 */
+#define ENDSTOP_2_PIN ((uint32_t)(1 << 5))           /* P0.5 connected to ENSDTOP_2 */
+#define BATTERY_LED_PIN ((uint32_t)(1 << 6))         /* P0.6 connected to BATTERY_LED */
 #define LOW_BATTERY_BUTTON_PIN ((uint32_t)(1 << 28)) /* P0.28 connected to LOW_BATTERY_BUTTON */
 #define MID_BATTERY_BUTTON_PIN ((uint32_t)(1 << 29)) /* P0.29 connected to MID_BATTERY_BUTTON */
 #define MAX_BATTERY_BUTTON_PIN ((uint32_t)(1 << 30)) /* P0.30 connected to MAX_BATTERY_BUTTON */
