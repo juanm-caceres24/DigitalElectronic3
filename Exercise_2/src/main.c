@@ -160,7 +160,7 @@ void stop_motor(void)
  * @brief Open or Close the door based in is_closed variable
  *
  */
-void toggle_DOOR(void)
+void toggle_door(void)
 {
     if (is_closed == 1)
     {
@@ -185,7 +185,7 @@ void EINT3_IRQHandler(void)
 {
     if (GPIO_GetIntStatus(PINSEL_PORT_0, DOOR_BUTTON_PIN, RISING_EDGE) == ENABLE)
     {
-        toggle_DOOR();
+        toggle_door();
     }
     else if (GPIO_GetIntStatus(PINSEL_PORT_0, ENDSTOP_1_PIN, RISING_EDGE) == ENABLE || GPIO_GetIntStatus(PINSEL_PORT_0, ENDSTOP_2_PIN, RISING_EDGE) == ENABLE)
     {
