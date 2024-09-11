@@ -14,8 +14,9 @@
 #include <cr_section_macros.h> /* MCUXpresso-specific macros */
 #endif
 
-#include "lpc17xx_gpio.h"   /* GPIO handling */
-#include "lpc17xx_pinsel.h" /* Pin function selection */
+#include "lpc17xx_gpio.h"    /* GPIO handling */
+#include "lpc17xx_pinsel.h"  /* Pin function selection */
+#include "lpc17xx_systick.h" /* Systick handling */
 
 /* Pin Definitions */
 
@@ -49,7 +50,7 @@
 #define LOW_BATTERY (uint8_t)0
 
 /* Systick time */
-#define SYSTICK_TIME 100 // Interrupt time for systick in [ms]
+#define SYSTICK_TIME 100 /* Interrupt time for systick in [ms] */
 
 uint8_t systick_counter = 0;         /* Counter for systick */
 uint8_t battery_level = MAX_BATTERY; /* It can be 2(max), 1(mid), 0(low) */
@@ -126,6 +127,84 @@ void configure_GPIO_ports(void)
 }
 
 /**
+ * @brief Configurate systick with internal clock to interrupt every SYSTICK_TIME
+ *
+ */
+void configure_SysTick(void)
+{
+    SYSTICK_InternalInit(SYSTICK_TIME);
+}
+
+void start_interruptions(void)
+{
+    NVIC_EnableIRQ(EINT3_IRQn);   /* Enable NVIC PORT 0 interrupts */
+    NVIC_EnableIRQ(SysTick_IRQn); /* Enable NVIC SysTick interrupts */
+    SYSTICK_IntCmd(ENABLE);       /* Enable SysTick interrupts */
+}
+
+void start_SysTick(void)
+{
+    SYSTICK_Cmd(ENABLE); /* Enable SysTick */
+}
+
+/**
+ * @brief Overwrite the interrupt handler routine for GPIO
+ * Toggle door if DOOR_BUTTON has been presioned
+ * Stop the motor if the interrupt has been caused by the anyone of the endstops
+ * Change battery value if anyone of the three buttons has been presioned
+ *
+ */
+void EINT3_IRQHandler(void)
+{
+    if (GPIO_GetIntStatus(PINSEL_PORT_0, DOOR_BUTTON_PIN, RISING_EDGE) == ENABLE)
+    {
+        toggle_door();
+    }
+    else if (GPIO_GetIntStatus(PINSEL_PORT_0, ENDSTOP_1_PIN, RISING_EDGE) == ENABLE || GPIO_GetIntStatus(PINSEL_PORT_0, ENDSTOP_2_PIN, RISING_EDGE) == ENABLE)
+    {
+        stop_motor();
+    }
+    else if (GPIO_GetIntStatus(PINSEL_PORT_0, LOW_BATTERY_BUTTON_PIN, RISING_EDGE) == ENABLE)
+    {
+        battery_level = LOW_BATTERY;
+    }
+    else if (GPIO_GetIntStatus(PINSEL_PORT_0, MID_BATTERY_BUTTON_PIN, RISING_EDGE) == ENABLE)
+    {
+        battery_level = MID_BATTERY;
+    }
+    else if (GPIO_GetIntStatus(PINSEL_PORT_0, MAX_BATTERY_BUTTON_PIN, RISING_EDGE) == ENABLE)
+    {
+        battery_level = MAX_BATTERY;
+    }
+}
+
+/**
+ * @brief Overwrite the Systick handler routine
+ * Determine the led light frecuency based on the battery status
+ * Increase a counter to can count one second (count = 10) or 400ms (count =4)
+ *
+ */
+void SysTick_Handler(void)
+{
+    systick_counter++;
+    if (battery_level == MAX_BATTERY)
+    {
+        GPIO_ClearValue(PINSEL_PORT_0, BATTERY_LED_PIN);
+    }
+    else if (battery_level == MID_BATTERY && systick_counter == 10)
+    {
+        toggle_LED();
+        systick_counter = 0;
+    }
+    else if (battery_level == LOW_BATTERY && systick_counter == 4)
+    {
+        toggle_LED();
+        systick_counter = 0;
+    }
+    return;
+}
+
+/**
  * @brief Enable current flow from relay1 to relay 2 closing the door
  *
  */
@@ -175,46 +254,6 @@ void toggle_door(void)
 }
 
 /**
- * @brief Overwrite the interrupt handler routine for GPIO
- * Toggle door if DOOR_BUTTON has been presioned
- * Stop the motor if the interrupt has been caused by the anyone of the endstops
- * Change battery value if anyone of the three buttons has been presioned
- *
- */
-void EINT3_IRQHandler(void)
-{
-    if (GPIO_GetIntStatus(PINSEL_PORT_0, DOOR_BUTTON_PIN, RISING_EDGE) == ENABLE)
-    {
-        toggle_door();
-    }
-    else if (GPIO_GetIntStatus(PINSEL_PORT_0, ENDSTOP_1_PIN, RISING_EDGE) == ENABLE || GPIO_GetIntStatus(PINSEL_PORT_0, ENDSTOP_2_PIN, RISING_EDGE) == ENABLE)
-    {
-        stop_motor();
-    }
-    else if (GPIO_GetIntStatus(PINSEL_PORT_0, LOW_BATTERY_BUTTON_PIN, RISING_EDGE) == ENABLE)
-    {
-        battery_level = LOW_BATTERY;
-    }
-    else if (GPIO_GetIntStatus(PINSEL_PORT_0, MID_BATTERY_BUTTON_PIN, RISING_EDGE) == ENABLE)
-    {
-        battery_level = MID_BATTERY;
-    }
-    else if (GPIO_GetIntStatus(PINSEL_PORT_0, MAX_BATTERY_BUTTON_PIN, RISING_EDGE) == ENABLE)
-    {
-        battery_level = MAX_BATTERY;
-    }
-}
-
-/**
- * @brief Configurate systick with internal clock to interrupt every SYSTICK_TIME
- *
- */
-void configure_SysTick(void)
-{
-    SYSTICK_InternalInit(SYSTICK_TIME);
-}
-
-/**
  * @brief Toggle the LED based in previous status
  *
  */
@@ -231,32 +270,6 @@ void toggle_LED(void)
 }
 
 /**
- * @brief Overwrite the Systick handler routine
- * Determine the led light frecuency based on the battery status
- * Increase a counter to can count one second (count = 10) or 400ms (count =4)
- *
- */
-void SysTick_Handler(void)
-{
-    systick_counter++;
-    if (battery_level == MAX_BATTERY)
-    {
-        GPIO_ClearValue(PINSEL_PORT_0, BATTERY_LED_PIN);
-    }
-    else if (battery_level == MID_BATTERY && systick_counter == 10)
-    {
-        toggle_LED();
-        systick_counter = 0;
-    }
-    else if (battery_level == LOW_BATTERY && systick_counter == 4)
-    {
-        toggle_LED();
-        systick_counter = 0;
-    }
-    return;
-}
-
-/**
  * @brief Main function.
  * Initializes the system and toggles the LED based on the input pin state.
  *
@@ -266,8 +279,8 @@ int main(void)
     SystemInit();           /* Initialize the system clock (default: 100 MHz) */
     configure_GPIO_ports(); /* Configure GPIO pins */
     configure_SysTick();    /* Configure SysTick */
-    SYSTICK_IntCmd(ENABLE); /* Enable SysTick interrupts */
-    SYSTICK_Cmd(ENABLE);    /* Enable SysTick counter */
+    start_interruptions();  /* Enable interruptions */
+    start_SysTick();        /* Start SysTick */
     while (TRUE)
     {
         /* Wait for interrupts */
