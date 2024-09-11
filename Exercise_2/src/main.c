@@ -183,7 +183,7 @@ void toggle_DOOR(void)
  */
 void EINT3_IRQHandler(void)
 {
-    if (GPIO_GetIntStatus(PINSEL_PORT_0, DOOR_BUTTON_PIN, RISING_EDGE == ENABLE))
+    if (GPIO_GetIntStatus(PINSEL_PORT_0, DOOR_BUTTON_PIN, RISING_EDGE) == ENABLE)
     {
         toggle_DOOR();
     }
