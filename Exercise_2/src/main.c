@@ -17,6 +17,7 @@
 #include "lpc17xx_gpio.h"    /* GPIO handling */
 #include "lpc17xx_pinsel.h"  /* Pin function selection */
 #include "lpc17xx_systick.h" /* Systick handling */
+#include "lpc17xx_timer.h"   /* Timer handling */
 
 /* Pin Definitions */
 
