@@ -123,7 +123,7 @@ extern "C"
  * Macros define for I2C mode
  ***********************************************************************/
 #define PINSEL_I2C_Normal_Mode ((0)) /**< The standard drive mode */
-#define PINSEL_I2C_Fast_Mode   ((1)) /**< Fast Mode Plus drive mode */
+#define PINSEL_I2C_Fast_Mode   ((1)) /**<  Fast Mode Plus drive mode */
 
 /**
  * @}

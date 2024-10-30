@@ -3,6 +3,7 @@
         "lpc17xx_gpio.h": "c",
         "lpc17xx_pinsel.h": "c",
         "lpc17xx.h": "c",
-        "lpc17xx_adc.h": "c"
+        "lpc17xx_adc.h": "c",
+        "lpc17xx_gpdma.h": "c"
     }
 }
